@@ -9,7 +9,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 
 class DocumentUploadSerializer(serializers.Serializer):
-    title = serializers.CharField(max_length=255)
+    title = serializers.CharField(max_length=255, required=False, allow_blank=True)
     file = serializers.FileField()
 
 

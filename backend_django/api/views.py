@@ -53,8 +53,18 @@ def upload_document(request):
     """
     serializer = DocumentUploadSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    title = serializer.validated_data["title"]
+    title = serializer.validated_data.get("title") or ""
     file_obj = serializer.validated_data["file"]
+    # Default title to filename if not provided
+    try:
+        inferred_title = getattr(file_obj, "name", "") or "Untitled"
+        # Remove extension for nicer titles
+        if "." in inferred_title:
+            inferred_title = inferred_title.rsplit(".", 1)[0] or inferred_title
+    except Exception:
+        inferred_title = "Untitled"
+    if not title:
+        title = inferred_title
 
     with transaction.atomic():
         doc = Document.objects.create(
