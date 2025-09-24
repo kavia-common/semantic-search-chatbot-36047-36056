@@ -16,9 +16,13 @@ Quick start
 2) Create .env from example and set Postgres if needed.
 3) Run migrations:
    python backend_django/manage.py migrate
-4) Start server:
+4) (Optional) Seed static test documents (no upload needed):
+   python backend_django/manage.py seed_test_documents
+   # Or set AUTO_SEED_STATIC_DOCS=true to auto-seed on startup
+   # e.g., export AUTO_SEED_STATIC_DOCS=true
+5) Start server:
    python backend_django/manage.py runserver 0.0.0.0:8000
-5) Open API docs at /docs
+6) Open API docs at /docs
 
 Notes
 - FAISS index stored at FAISS_INDEX_PATH. Use management command to rebuild:
