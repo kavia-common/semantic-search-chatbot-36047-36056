@@ -73,8 +73,26 @@ def upload_document(request):
         doc.save()
 
         # Read and chunk content
-        text, _ = read_file_to_text(doc.file.path, doc.mime_type)
+        # Prefer reading from the uploaded file object to avoid storage path dependence.
+        try:
+            text, _ = read_file_to_text(file_path=getattr(doc.file, "path", None),
+                                        mime_type=doc.mime_type,
+                                        file_obj=getattr(doc.file, "file", None))
+        except Exception as e:
+            return Response({"detail": f"Failed to read uploaded file: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not text or not text.strip():
+            return Response(
+                {"detail": "Uploaded file contains no extractable text. Please upload a text, PDF, or DOCX document."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         chunks = chunk_text(text)
+        if not chunks:
+            return Response(
+                {"detail": "No chunks could be created from the uploaded content."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Persist chunks and index to FAISS
         dim = int(getattr(settings, "EMBEDDING_DIM", 384))
